@@ -28,4 +28,4 @@
 ---gm25_odom---
   "Publish odometry from gm25 motors, connect to arduino and power 2 motors first"
 
-  
+  roslaunch gm25_odom gm25_odom.launch

@@ -57,14 +57,14 @@ int main(int argc, char **argv){
   set_orientation(deg2rad(0));*/
 
   ros::Rate loop_rate(1);
-  turtlesim::Pose goal_pose;
-  goal_pose.x = 1;
-  goal_pose.y = 1;
-  goal_pose.theta = 0;  //radian
-  move_goal(goal_pose, 0.01);
-  loop_rate.sleep();
+  // turtlesim::Pose goal_pose;
+  // goal_pose.x = 10;
+  // goal_pose.y = 10;
+  // goal_pose.theta = 0;  //radian
+  // move_goal(goal_pose, 0.01);
+  // loop_rate.sleep();
 
-  //spiral_move();
+  spiral_move();
 
   ros::spin();
   return 0;

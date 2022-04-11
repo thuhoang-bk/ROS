@@ -5,7 +5,7 @@
   </node>
   <node pkg="gm25_odom" type="odom_publisher" name="odom_pub" />
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="vel_pub">
-    <param name="speed" value="0.5" />
+    <param name="speed" value="0.1" />
     <param name="turn" value="0.5" />
     <param name="repeat_rate" value="100" />
   </node>

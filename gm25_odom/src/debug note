@@ -4,102 +4,102 @@
 
 	Vấn đề có vẻ nằm ở /teleop_twist, tắt node này đi thì không vấn đề gì, không
 	bao giờ bị đơ, đẩy liên tục, để một lúc, xong lại đẩy -> đều ok vẫn nhận msg
-	
+
 	Về logic, pub vị trí liên tục sẽ cập nhật được tức thời sự thay đổi vị trí
 	nên ổn.
-	
+
 	Vấn đề là tại sao teleop lỗi? publish_rate? subscribe callback?
-	
+
 	Gây ra lost sync, bỏ repeat rate đi vẫn bị
-	
+
 	callback() gây ra lỗi sync?
-	
-	Buộc phải sub /cmd_vel, nếu |serial không sub /cmd_vel cũng phải sub cái khác 
+
+	Buộc phải sub /cmd_vel, nếu |serial không sub /cmd_vel cũng phải sub cái khác
 	để nhận vel từ ROS, arduino không thể tự biết được vel (nếu thế sẽ phải cài
 	giải thuật tính vel trên arduino!!
-	
+
 	Vậy serial buộc phải sub /cmd_vel.
-	
+
 	Tối ưu callback
 	Tốc độ publish: bỏ rate đi cũng không ảnh hưởng, rate=100 vẫn lỗi
 	để repeat_rate=1000 còn không chạy lúc đầu, xong chạy linh tinh.
 	>> pub nhanh theo lý sẽ gọi nhiều callback hơn gây lỗi, chậm ít callback
 		vẫn lỗi.
-	
+
 	Thử có /cmd_vel nhưng không callback?
 	Test nhỏ giọt trong hơn 1 phút, vẫn ok, vấn đề nằm ở callback
-	
+
 	1. giảm tối đa kích thước callback (chỉ lấy giá trị trả cho main, ko tính toán)
 	2. Nghe nói callback tối thiểu tốn khoảng 40ms
-	
+
 	Vì ngắt là do phần cứng nên xảy ra rất nhanh (cỡ 4us=0.004ms), trong ngắt đếm xung
-	chỉ có 1 lệnh tăng xung không đáng kể nên có thể coi tổng thời gian ngắt đếm xung 
-	trong 10ms là 
-	(390*200/60 xung/s max = 1300 xung/s = 13 xung/10ms) 0.004*13 
+	chỉ có 1 lệnh tăng xung không đáng kể nên có thể coi tổng thời gian ngắt đếm xung
+	trong 10ms là
+	(390*200/60 xung/s max = 1300 xung/s = 13 xung/10ms) 0.004*13
 	>> 0.04ms: trivial.
-	
-	Thời gian PID: ko có loop, 2 lệnh digitalW 8us, 1 lệnh analogW 76us 
+
+	Thời gian PID: ko có loop, 2 lệnh digitalW 8us, 1 lệnh analogW 76us
 	>> Tổng 0.1ms/10ms
-	
+
 	test pub trong 10us được 11 msg geometry/Twist
-	>> ~1us per message. 
+	>> ~1us per message.
 	spinOnce chậm quá sẽ tích quá nhiều msg ->  tràn buffer nhận -> lost sync
-	
+
 	Vấn đề nằm ở teleop_twist! chuyển sang turtlebot3_teleop thì được rất lâu, và echo
 	lại topic là lại có. Nếu connect lại được với publisher (cmd_vel)
 	Thỉnh thoảng bị lost_sync rồi kết nối lại. (nếu lâu không ấn phím)
 	-> được lâu hơn nhiều và có khả năng kết nối lại, nhưng ấn dừng một lúc mới dừng
 	chứng tỏ pubrate chậm?
-	
-	
+
+
 	lost_sync == không nhận được msg nữa, requesting topic... stuck
-	
-	KEY: repeat_rate=0 tuy chậm, phải giữ phím một lúc nhưng không bị lỗi sync 
+
+	KEY: repeat_rate=0 tuy chậm, phải giữ phím một lúc nhưng không bị lỗi sync
 	(đi vel=10 đến hơn 1000 = 100s không lỗi) trong khi rr=100 chỉ được đến khoảng
 	100. rr=10 5p cũng chưa thấy lỗi, ko bị lỡ key, chờ lúc là được.
 	rr=50 được 500 thì lỗi.
-	
+
 	rr=0: ổn định, không lost sync, bỏ lỡ key_event thậm chí vel_msg pub thủ công
 		(default)
 	rr=10: khá ổn định, không bỏ lỡ key_event
 	rr=100: nhanh lost_sync, bắt key_event ngay lập tức
-	
+
 	>> suy ra: do bắt key_event liên tục (callback liên tục) nên lost_sync.
 		nguyên nhân chi tiết: chưa rõ
 	>> giải pháp: pub liên tục 2-3 msg liền nhau một lần.
-	
+
 	pub thủ công: chỉ tiến chứ không lùi, ít nhất cũng phải có giây lùi chứ?
 	pub liên tục trong 100us (tầm 100msg liên tục) cũng không được
 	pub rate thành 100msg/s 100 tiến 100 lùi thì được một lúc là lost_sync
-	
-	
+
+
 	DELAY(100) - tràn buffer do spinOnce() không kịp
 	dùng milis() để giới hạn tốc độ pub, trong khi vẫn spin liên tục.
-	
+
 	BAUD và BUFFER(PUB/SUB) là hai thông số quan trọng, được print ra màn hình
 	ngay khi khởi động node serial. BUFFER thể hiện kích thước lớn nhất của msg
 	có thể truyền, giảm số lượng pub/sub có thể tăng kích thước buffer(?).
-	
+
 	BAUD là quan trọng hơn, vì liên quan đến tốc độ pub/sub msgs - tốc độ trao đổi
 	dữ liệu.
-	
+
 	Baud ở terminal (rosrun rosserial... _baud:=) mà khác trong ArduinoHardware.h
 	là "ERROR: Unable to sync" ngay.
 	>> phải sửa trực tiếp trong roslib/ArduinoHardware.h mới được.
 	Set baud 500k (examples/roslib/pubsub) vẫn hoạt động bình thường.
 	Còn đôi với GM25_odom thì chỉ được đến 115200, mà sau vẫn lỗi sync.
 	>> nhưng chạy khá lâu, đến cỡ 600.
-	Nếu để 500k (hay lớn hơn 300400 - GM25) thì lỗi: "wrong check sum for 
+	Nếu để 500k (hay lớn hơn 300400 - GM25) thì lỗi: "wrong check sum for
 	topic id and msg" .. Sau một hồi khá lâu thì cũng lost sync.
-	
+
 	Đúng là tốc độ truyền nhận có vấn đề, sửa lại pub rate xem.
 	pub rate = 100: được lâu, lost_sync phục hồi được nhưng hơi lâu.
 	pub rate = 10: được khá lâu, đến 600, vẫn lost_sync
 	pub rate = 1: 1500 mới lost_sync
-	
+
 	Fix xong, chạy ổn, không lỗi, công thức chưa chuẩn hoặc PID chưa chuẩn or Pin yếu
 	nên odom trên rviz hơi xấu. Workflow: (Đã sửa baud ~Ard/roslib/ArduinoHardware.h)
-	
+
 	roscore
 	rosrun rosserial_arduino serial_node.py _port:=/dev/tty_arduino_mega _baud:=600800
 	rosrun teleop_twist_keyboard teleop_twist_keyboard.py _repeat_rate:=100
@@ -108,13 +108,13 @@
 	rviz
 
 	launch note
-	
+
 	baud 1tr (phòng sau tích hợp thêm cảm biến), dữ liệu vị trí theo lý thuyết cũng chỉ
 	được update sau 10ms nên pub_rate lớn hơn 100 Hz là vô nghĩa, và gây lỗi wrong
 	check sum.
-	
+
 	Mega MAX baud = 4.000.000, đã test, lên 4.000.001 là "unable to sync"
-	"You need to study the Atmega 2560 datasheet to figure out if it can reliably 
+	"You need to study the Atmega 2560 datasheet to figure out if it can reliably
 	generate your desired baud rate. There is a formula. With a 16MHz clock it can
 	produce 500,000 and 1,000,000 baud without any timing errors. But, for example,
 	115200 has a 2% to 3% error."
@@ -122,3 +122,6 @@
 	"The highest possible baud rate for an AVR processor running at 16 MHz is 2 M."
 	https://forum.arduino.cc/t/just-discovered-the-maximum-serial-speed-on-the
 	mega-2560/400142 >> maybe mine mega just good-fake-chip :v
+
+	Test chạy rất thẳng, tốc độ cao mới hơi lệch do bản chất công thức tính chỉ phù
+	hợp với vận tốc nhỏ, tuy nhiên vẫn trong mức chấp nhận được.

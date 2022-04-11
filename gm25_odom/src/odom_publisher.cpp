@@ -2,17 +2,17 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
+#include <my_msgs/RobotState.h>
 
 double x=0, y=0, th=0, vx=0, vy=0, vth=0;
 
-void state_callback(const geometry_msgs::Twist::ConstPtr& state_msg) {
-  x = state_msg->linear.x;
-  y = state_msg->linear.y;
-  th = state_msg->linear.z;
+void state_callback(const my_msgs::RobotState::ConstPtr& state_msg) {
+  x = state_msg->x;
+  y = state_msg->y;
+  th = state_msg->theta;
 
-  vx = state_msg->angular.x;
-  vy = 0;
-  vth = state_msg->angular.y;
+  vx = state_msg->vx;
+  vth = state_msg->vtheta;
 }
 
 int main(int argc, char** argv){

@@ -23,5 +23,3 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_executable(turtlesim_cleaner_node src/turtlesim_cleaner_node.cpp)
 target_link_libraries(turtlesim_cleaner_node ${catkin_LIBRARIES})
 # add_dependencies(turtlesim_cleaner_node turtlesim_cleaner_gencpp)
-
-#---pycode---

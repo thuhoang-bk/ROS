@@ -1,0 +1,14 @@
+<launch>
+  <arg name="my_agv"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+
+  <arg name="model" default="$(find my_agv)/urdf/my_agv.urdf.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+    args="-urdf -param robot_description -model my_agv"
+    output="screen" />
+</launch>

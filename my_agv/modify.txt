@@ -1,0 +1,12 @@
+
+	- chỉnh lại chiều trục bánh xe, chiều dày bánh xe cỡ 6 cm thôi - quay đỡ giật
+	
+	- bật
+		roslaunch my_agv agv_gazebo.launch
+		roslaunch my_agv agv_slam.launch 
+		teleop
+		>> tạo map
+	- bật 
+		gazebo
+		agv_navigation.launch
+		>> tìm đường tránh cản

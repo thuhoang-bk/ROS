@@ -1,0 +1,28 @@
+<launch>
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <!--param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /-->
+    <!--param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS" /-->
+    <param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" />
+    <!--param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /-->
+    <param name="base_global_planner" value="navfn/NavfnROS" />
+
+    <rosparam file="$(find my_robot_navigation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find my_robot_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find my_robot_navigation)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find my_robot_navigation)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find my_robot_navigation)/config/move_base_params.yaml" command="load" />
+    <!--rosparam file="$(find my_robot_navigation)/config/base_local_planner_params.yaml" command="load" /-->
+    <rosparam file="$(find my_robot_navigation)/config/base_global_planner.yaml" command="load" />
+    <!--rosparam file="$(find my_robot_navigation)/config/dwa_local_planner.yaml" command="load" /-->
+    <!--rosparam file="$(find my_robot_navigation)/config/teb_local_planner_params.yaml" command="load" /-->
+    <!--rosparam file="$(find my_robot_navigation)/config/eband_local_planner_params.yaml" command="load" /-->
+    
+    <!--param name="recovery_behavior_enabled" value="true"/-->
+    <param name="make_plan_add_unreachable_goal" value="true"/>
+    <remap from="cmd_vel" to="/cmd_vel"/>
+    <remap from="odom" to="odom"/>
+    <remap from="scan" to="scan"/>
+  </node>
+</launch>

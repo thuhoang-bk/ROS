@@ -1,0 +1,39 @@
+<launch>
+  <master auto="start"/>
+  <!-- Simulation world -->
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!--arg name="world_name" value="$(find my_robot_gazebo)/worlds/my_robot_world.world"/-->
+    <arg name="world_name" value="$(find my_robot)/world/sdv_room.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- Robot model -->
+
+  <arg name="model" default="$(find my_robot)/urdf/my_robot/my_robot.urdf.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model my_robot -x 0.0 -y -2.0 -z 0.0" />
+
+  <!--publish tf >
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_broadcaster" args="0 0 0 0 0 0 1 odom map" /-->
+
+  <!-- Rviz simulation -->
+  <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+	<param name="use_gui" value="false"/>
+  </node-->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_robot)/rviz/my_robot.rviz" />
+
+  <!-- Navigaion -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(find my_robot_navigation)/maps/map.yaml"/>
+  <!--include file="$(find my_robot_navigation)/launch/laser_scan_matcher.launch"/-->
+  <include file="$(find my_robot_navigation)/launch/amcl.launch"/>
+  <include file="$(find my_robot_navigation)/launch/move_base.launch"/>
+
+</launch>

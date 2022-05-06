@@ -1,5 +1,5 @@
 
-	- chỉnh lại chiều trục bánh xe, chiều dày bánh xe cỡ 6 cm thôi - quay đỡ giật
+	- chỉnh lại chiều trục bánh xe, chiều dày bánh xe cỡ 6 cm thôi - quay đỡ giật, tạo map chuẩn.
 	
 	- bật
 		roslaunch my_agv agv_gazebo.launch
